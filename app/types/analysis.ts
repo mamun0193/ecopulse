@@ -23,4 +23,10 @@ export interface AnalysisResult {
     }[];
     url: string;
     pageSizeMB: number;
+    ecoScore?: {
+        value?: number;
+        score: string;
+        label: string;
+        color: string;
+    };
 }

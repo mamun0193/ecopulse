@@ -4,13 +4,9 @@ import { withErrorHandler } from "@/middleware/errorHandler";
 import { isValidUrl, normalizeUrl } from "@/helpers/validation";
 import { generateSuggestions } from "@/lib/suggestions";
 import { AnalysisResult } from "@/app/types/analysis";
-export const runtime = 'nodejs';
-
-// Constants (real-world averages)
-const ENERGY_PER_MB = 0.81;     // Wh per MB
-const CO2_PER_WH = 0.442;       // grams CO₂ per Wh
-const WATER_PER_WH = 0.0018;    // liters per Wh
-
+import { bytesToKB, bytesToMB, computeImpactsFromPageSizeMB, roundTo } from "@/lib/Calculations/calculations";
+import { trackPageResources } from "@/lib/resourceAnalyzer";
+import { calculateEcoScore } from "@/lib/Calculations/ecoScore";
 
 
 const handler = async (req: NextRequest) => {
@@ -42,7 +38,7 @@ const handler = async (req: NextRequest) => {
         else {
             //Execute locally
             const puppeteer = await import("puppeteer")
-            browser= await puppeteer.default.launch()
+            browser = await puppeteer.default.launch()
         }
 
         const page = await browser.newPage();
@@ -51,108 +47,48 @@ const handler = async (req: NextRequest) => {
         // Track HTML,CSS,JS,Images, API calls, Third-party scripts
 
         const pageDomain = new URL(normalizedUrl).hostname;
-        let totalBytes = 0;
-        let htmlBytes = 0;
-        let cssBytes = 0;
-        let jsBytes = 0;
-        let imageBytes = 0;
-        let apiBytes = 0;
-        let apiCalls = 0;
-        let thirdPartyAPICalls = 0;
-        let thirdPartyAPIBytes = 0;
-        let requestCount = 0;
 
-        page.on("response", async (response) => {
-            try {
-                const request = response.request();
-                const url = request.url();
-                const type = request.resourceType();
+        const resourceData = await trackPageResources(page, normalizedUrl, pageDomain);
 
-                if (
-                    url.startsWith("data:") ||
-                    url.startsWith("blob:") ||
-                    url.startsWith("chrome")
-                ) return;
-
-                const buffer = await response.buffer().catch(() => null);
-                if (!buffer) return;
-
-                const size = buffer.length;
-                const hostname = new URL(url).hostname;
-                const isThirdParty = hostname !== pageDomain;
-
-                requestCount++;
-
-                if (isThirdParty) {
-                    thirdPartyAPIBytes += size;
-                    thirdPartyAPICalls++;
-                }
-
-                switch (type) {
-                    case "document":
-                        htmlBytes += size;
-                        break;
-                    case "stylesheet":
-                        cssBytes += size;
-                        break;
-                    case "script":
-                        jsBytes += size;
-                        break;
-                    case "image":
-                        imageBytes += size;
-                        break;
-                    case "xhr":
-                    case "fetch":
-                        apiBytes += size;
-                        apiCalls++;
-                        break;
-                    default:
-                        break;
-                }
-            } catch (err) {
-                console.error("Resource parse error:", err);
-            }
-        });
-
-        await page.goto(normalizedUrl, {
-            waitUntil: "networkidle0",
-            timeout: 60000
-        });
-        totalBytes = htmlBytes + cssBytes + jsBytes + imageBytes + apiBytes + thirdPartyAPIBytes;
 
         // Calculations
 
-        const pageSizeMB = totalBytes / (1024 * 1024); // Convert bytes to MB
-        const toKB = (bytes: number) => parseFloat((bytes / 1024).toFixed(2));
-        const energyConsumptionWh = pageSizeMB * ENERGY_PER_MB;
-        const estimatedCO2g = energyConsumptionWh * CO2_PER_WH;
-        const estimatedWaterL = energyConsumptionWh * WATER_PER_WH;
+        const rawPageSizeMB = bytesToMB(resourceData.totalBytes);
+        const impacts = computeImpactsFromPageSizeMB(rawPageSizeMB);
 
         // Build the analysis object first (without suggestions), then generate suggestions
         const response: AnalysisResult = {
             url: normalizedUrl,
-            pageSizeMB: parseFloat(pageSizeMB.toFixed(2)),
-
+            pageSizeMB: roundTo(rawPageSizeMB, 2),
             resources: {
-                requestCount,
-                totalBytes: toKB(totalBytes),
-                html: toKB(htmlBytes),
-                css: toKB(cssBytes),
-                js: toKB(jsBytes),
-                image: toKB(imageBytes),
-                apiBytes: toKB(apiBytes),
-                apiCalls: apiCalls,
-                thirdPartyAPIBytes: toKB(thirdPartyAPIBytes),
-                thirdPartyAPICalls: thirdPartyAPICalls,
+                requestCount: resourceData.requestCount,
+                totalBytes: bytesToKB(resourceData.totalBytes),
+                html: bytesToKB(resourceData.htmlBytes),
+                css: bytesToKB(resourceData.cssBytes),
+                js: bytesToKB(resourceData.jsBytes),
+                image: bytesToKB(resourceData.imageBytes),
+                apiBytes: bytesToKB(resourceData.apiBytes),
+                apiCalls: resourceData.apiCalls,
+                thirdPartyAPIBytes: bytesToKB(resourceData.thirdPartyAPIBytes),
+                thirdPartyAPICalls: resourceData.thirdPartyAPICalls,
             },
 
             impacts: {
-                energyWH: energyConsumptionWh.toFixed(3) as unknown as number,
-                carbon: estimatedCO2g.toFixed(3) as unknown as number,
-                water: estimatedWaterL.toFixed(4) as unknown as number,
+                energyWH: impacts.energyWH,
+                carbon: impacts.carbon,
+                water: impacts.water,
             },
             suggestions: [],
+            ecoScore: calculateEcoScore({
+                energyWh: impacts.energyWH,
+                carbon: impacts.carbon,
+                pageSizeMB: rawPageSizeMB,
+                jsMB: bytesToMB(resourceData.jsBytes),
+                apiCalls: resourceData.apiCalls,
+                thirdPartyRequests: resourceData.thirdPartyAPICalls,
+            }),
         };
+
 
         // Generate suggestions using the analysis data
         try {

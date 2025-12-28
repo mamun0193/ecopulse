@@ -13,7 +13,7 @@ export default function Home() {
       </p>
 
       <Link
-        href="/Home"
+        href="/result"
         className="bg-green-700 hover:bg-green-800 transition text-white px-8 py-3 rounded-full text-lg font-semibold shadow-md"
       >
         Analyze Your Website

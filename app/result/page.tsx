@@ -8,6 +8,8 @@ import ImpactCard from "@/components/ImpactCard";
 import ResourceCard from "@/components/ResourceCard";
 import SuggestionCard from "@/components/SuggestionCard";
 import toast from "react-hot-toast";
+import Graph from "@/components/Graph";
+import Eco from "@/components/Eco";
 
 export default function AnalyzeUrl() {
   const [url, setUrl] = useState("");
@@ -63,8 +65,10 @@ export default function AnalyzeUrl() {
 
         {!loading && data && (
           <>
+            <Eco data={data} />
             <ResourceCard data={data} />
             <ImpactCard data={data} />
+            <Graph resources={data.resources} />
             <SuggestionCard suggestions={data.suggestions} />
           </>
         )}
