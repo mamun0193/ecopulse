@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EcoPulse
 
-## Getting Started
+EcoPulse is a Next.js app that measures a website's page-weight and estimates environmental impact (energy, CO₂, and water) based on network resources loaded during a real page visit.
 
-First, run the development server:
+It uses Puppeteer to load the target URL, tallies transferred bytes by resource type (HTML/CSS/JS/images/API + third-party), then returns impact metrics and improvement suggestions.
+
+## Features
+
+- URL analyzer UI (`/Home`) with toast notifications and loading skeletons
+- Breakdown of page resources (KB) and request counts
+- Estimated impact metrics:
+	- Energy (Wh)
+	- Carbon (g CO₂)
+	- Water (L)
+- Suggestions engine based on thresholds (payload size, third-party calls, JS/image weight, etc.)
+
+## Tech stack
+
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- Puppeteer (local) + `puppeteer-core` + `@sparticuz/chromium` (serverless/Vercel)
+
+## Getting started (local)
+
+Prereqs:
+
+- Node.js (recommended: current LTS)
+- A working Chrome/Chromium install (Puppeteer will download its own Chromium by default)
+
+Install deps:
+
+```bash
+npm install
+```
+
+Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `http://localhost:3000` (landing)
+- `http://localhost:3000/Home` (analyzer)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API
 
-## Learn More
+### `POST /api/analyze`
 
-To learn more about Next.js, take a look at the following resources:
+Request body:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```json
+{ "url": "https://example.com" }
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Response (shape):
 
-## Deploy on Vercel
+```ts
+export interface AnalysisResult {
+	url: string;
+	pageSizeMB: number;
+	resources: {
+		requestCount: number;
+		totalBytes: number;
+		html: number;
+		css: number;
+		js: number;
+		image: number;
+		apiCalls: number;
+		apiBytes: number;
+		thirdPartyAPICalls: number;
+		thirdPartyAPIBytes: number;
+	};
+	impacts: {
+		energyWH: number;
+		carbon: number;
+		water: number;
+	};
+	suggestions: { id: string; message: string; severity: "low" | "medium" | "high" }[];
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Quick test:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+curl -X POST http://localhost:3000/api/analyze \
+	-H "Content-Type: application/json" \
+	-d "{\"url\":\"https://example.com\"}"
+```
+
+## Notes (how analysis works)
+
+- The API loads the page with Puppeteer and listens to network responses.
+- It categorizes payloads by resource type (document/stylesheet/script/image/xhr/fetch).
+- It also tracks third-party requests by comparing hostnames to the main page domain.
+
+Estimated impact uses constants in the API route:
+
+- `ENERGY_PER_MB = 0.81` Wh per MB
+- `CO2_PER_WH = 0.442` grams CO₂ per Wh
+- `WATER_PER_WH = 0.0018` liters per Wh
+
+## Deployment
+
+- The API route is configured to run on the Node.js runtime (`runtime = "nodejs"`).
+- On Vercel/serverless, it switches to `puppeteer-core` + `@sparticuz/chromium` when `process.env.VERCEL` is set.
+
+## Scripts
+
+- `npm run dev` - start dev server
+- `npm run build` - production build
+- `npm run start` - start production server
+- `npm run lint` - run ESLint
+
+## License
+
+No license has been specified yet.
