@@ -527,10 +527,10 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 📞 Contact & Links
 
-- **Live Demo**: [Your deployed URL]
+- **Live Demo**: []
 - **Documentation**: [/docs](http://localhost:3000/docs)
 - **Feedback**: [/feedback](http://localhost:3000/feedback)
-- **GitHub**: [Your GitHub URL]
+- **GitHub**: [github.com/mamun0193]
 
 ---
 
