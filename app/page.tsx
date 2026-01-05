@@ -1,28 +1,41 @@
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
+import About from "@/components/About";
+import Features from "@/components/Features";
+import Process from "@/components/Process";
+import Testimonials from "@/components/Testimonials";
+import CTA from "@/components/CTA";
+
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center text-center px-6 font-serif">
+    <div className="min-h-screen flex flex-col bg-gray-950">
+      {/* Navbar */}
+      <Navbar />
 
-      <h1 className="text-4xl md:text-5xl font-bold text-green-600 mb-4">
-        EcoPulse
-      </h1>
+      {/* Main Content */}
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <Hero />
 
-      <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-6">
-        Measure your website’s environmental impact and performance.
-        Discover how much energy your site consumes — and how to make it greener.
-      </p>
+        {/* About Section */}
+        <About />
 
-      <Link
-        href="/result"
-        className="bg-green-700 hover:bg-green-800 transition text-white px-8 py-3 rounded-full text-lg font-semibold shadow-md"
-      >
-        Analyze Your Website
-      </Link>
+        {/* Features Section */}
+        <Features />
 
-      <p className="mt-6 text-sm text-gray-400">
-        No sign-up required • Instant insights • Sustainable web analytics 🌱
-      </p>
-    </main>
+        {/* How It Works Section */}
+        <Process />
 
+        {/* Testimonials Section */}
+        <Testimonials />
+
+        {/* CTA Section */}
+        <CTA />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }

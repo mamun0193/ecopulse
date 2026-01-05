@@ -32,6 +32,8 @@ export async function trackPageResources(page: Page, targetUrl: string, pageDoma
         script: "js",
         image: "image",
         media: "image",
+        font: "image",
+        video: "image",
         xhr: "api",
         fetch: "api",
     };
@@ -42,15 +44,35 @@ export async function trackPageResources(page: Page, targetUrl: string, pageDoma
             const url = request.url();
             const type = request.resourceType();
 
-            if (url.startsWith("data:") || url.startsWith("blob:") || url.startsWith("chrome"))
+            // Skip chrome internal URLs only
+            if (url.startsWith("chrome")) return;
+
+            // For data URLs, estimate size from the URL itself (base64 encoded content)
+            let size = 0;
+            if (url.startsWith("data:")) {
+                // Extract the base64 portion and calculate approximate size
+                const base64Match = url.match(/base64,(.+)/);
+                if (base64Match) {
+                    // Base64 string length * 0.75 gives approximate byte size
+                    size = Math.floor(base64Match[1].length * 0.75);
+                } else {
+                    return; // Skip data URLs without base64 content
+                }
+            } else if (url.startsWith("blob:")) {
+                // Skip blob URLs as we can't easily get their size
                 return;
-
-            const buffer = await response.buffer().catch(() => null);
-            if (!buffer) return;
-
-            const size = buffer.length;
-            const hostname = new URL(url).hostname;
-            const isThirdParty = hostname !== pageDomain;
+            } else {
+                const buffer = await response.buffer().catch(() => null);
+                if (!buffer) return;
+                size = buffer.length;
+            }
+            
+            // For data URLs, consider them as first-party resources
+            let isThirdParty = false;
+            if (!url.startsWith("data:")) {
+                const hostname = new URL(url).hostname;
+                isThirdParty = hostname !== pageDomain;
+            }
 
             requestCount++;
 
@@ -72,6 +94,29 @@ export async function trackPageResources(page: Page, targetUrl: string, pageDoma
     page.on("response", onResponse);
     try {
         await page.goto(targetUrl, { waitUntil: "networkidle0", timeout: 60000 });
+        
+        // Scroll down the page to trigger lazy-loaded images
+        await page.evaluate(async () => {
+            await new Promise<void>((resolve) => {
+                let totalHeight = 0;
+                const distance = 500;
+                const timer = setInterval(() => {
+                    const scrollHeight = document.body.scrollHeight;
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
+                    
+                    if (totalHeight >= scrollHeight || totalHeight >= 5000) {
+                        clearInterval(timer);
+                        window.scrollTo(0, 0); // Scroll back to top
+                        resolve();
+                    }
+                }, 100);
+            });
+        });
+        
+        // Wait for additional resources to load after scrolling
+        await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => {});
+        
     } finally {
         page.off("response", onResponse);
     }

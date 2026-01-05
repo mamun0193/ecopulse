@@ -5,6 +5,22 @@ export type EcoScore = {
     color: string;
 };
 
+type ScoreInput = {
+    energyWh: number;
+    carbon: number;
+    pageSizeMB: number;
+    jsMB?: number;
+    apiCalls?: number;
+    thirdPartyRequests?: number;
+};
+
+const getDeduction = (val: number, thresholds: [number, number][], penalties: number[]) => {
+    for (let i = 0; i < thresholds.length; i++) {
+        if (val > thresholds[i][0]) return penalties[i];
+    }
+    return 0;
+};
+
 export function calculateEcoScore({
     energyWh,
     carbon,
@@ -12,42 +28,28 @@ export function calculateEcoScore({
     jsMB = 0,
     apiCalls = 0,
     thirdPartyRequests = 0,
-}: {
-    energyWh: number;
-    carbon: number;
-    pageSizeMB: number;
-    jsMB?: number;
-    apiCalls?: number;
-    thirdPartyRequests?: number;
-}): EcoScore {
+}: ScoreInput): EcoScore {
     let value = 100;
-    if (pageSizeMB > 5) value -= 10;
-    else if (pageSizeMB > 3) value -= 5;
-    else if (pageSizeMB > 1) value -= 2;
-
-    if (jsMB > 4) value -= 10;
-    else if (jsMB > 2) value -= 5;
-    else if (jsMB > 1) value -= 2;
-
-    if (apiCalls > 20) value -= 10;
-    else if (apiCalls > 10) value -= 5;
-
-    if (thirdPartyRequests > 20) value -= 10;
-    else if (thirdPartyRequests > 10) value -= 5;
-
-    if (energyWh > 5) value -= 10;
-    else if (energyWh > 2) value -= 5;
-
-    if (carbon > 3) value -= 15;
-    else if (carbon > 2) value -= 10;
-    else if (carbon > 1) value -= 5;
+    
+    value -= getDeduction(pageSizeMB, [[5, 10], [3, 5], [1, 2]], [10, 5, 2]);
+    value -= getDeduction(jsMB, [[4, 10], [2, 5], [1, 2]], [10, 5, 2]);
+    value -= getDeduction(apiCalls, [[20, 10], [10, 5]], [10, 5]);
+    value -= getDeduction(thirdPartyRequests, [[20, 10], [10, 5]], [10, 5]);
+    value -= getDeduction(energyWh, [[5, 10], [2, 5]], [10, 5]);
+    value -= getDeduction(carbon, [[3, 15], [2, 10], [1, 5]], [15, 10, 5]);
 
     value = Math.max(0, Math.min(100, value));
 
-    if (value >= 90) return { value, score: "A+", label: "Excellent", color: "green" };
-    if (value >= 80) return { value, score: "A", label: "Very Good", color: "emerald" };
-    if (value >= 70) return { value, score: "B", label: "Good", color: "yellow" };
-    if (value >= 60) return { value, score: "C", label: "Needs Improvement", color: "orange" };
+    const ratings: [number, string, string, string][] = [
+        [90, "A+", "Excellent", "green"],
+        [80, "A", "Very Good", "emerald"],
+        [70, "B", "Good", "yellow"],
+        [60, "C", "Needs Improvement", "orange"],
+    ];
+
+    for (const [min, score, label, color] of ratings) {
+        if (value >= min) return { value, score, label, color };
+    }
 
     return { value, score: "D", label: "Poor", color: "red" };
 }
