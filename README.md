@@ -527,10 +527,10 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 📞 Contact & Links
 
-- **Live Demo**: []
-- **Documentation**: [/docs](http://localhost:3000/docs)
-- **Feedback**: [/feedback](http://localhost:3000/feedback)
-- **GitHub**: [github.com/mamun0193]
+- **Live Demo**: [https://ecopulse-henna.vercel.app/]
+- **Documentation**: [/docs](https://ecopulse-henna.vercel.app/docs)
+- **Feedback**: [/feedback](https://ecopulse-henna.vercel.app/features)
+- **GitHub**: [https://github.com/mamun0193]
 
 ---
 

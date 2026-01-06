@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getAllPosts, getAllCategories, BlogPost } from "@/lib/blogData";
@@ -54,14 +55,14 @@ export default function BlogPage() {
           <Link href={`/blog/${featuredPost.slug}`}>
             <div className="relative bg-gray-800/30 border border-gray-700/50 rounded-2xl overflow-hidden group hover:border-green-500/50 transition-all">
               <div className="grid md:grid-cols-2 gap-8">
-                {/* Image Placeholder */}
-                <div className="aspect-video md:aspect-auto bg-linear-to-br from-green-500/20 to-emerald-600/20 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <svg className="w-16 h-16 text-green-400/50 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-green-400/70 font-medium">Featured Article</span>
-                  </div>
+                {/* Image */}
+                <div className="aspect-video md:aspect-auto relative overflow-hidden">
+                  <Image
+                    src={featuredPost.coverImage}
+                    alt={featuredPost.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
 
                 {/* Content */}
@@ -202,11 +203,14 @@ function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`}>
       <article className="bg-gray-800/30 border border-gray-700/50 rounded-xl overflow-hidden group hover:border-green-500/50 transition-all h-full flex flex-col">
-        {/* Image Placeholder */}
-        <div className="aspect-video bg-linear-to-br from-green-500/10 to-emerald-600/10 flex items-center justify-center">
-          <svg className="w-12 h-12 text-green-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+        {/* Image */}
+        <div className="aspect-video relative overflow-hidden">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
         {/* Content */}

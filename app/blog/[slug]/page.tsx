@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -210,6 +211,19 @@ export default function BlogPostPage() {
               <p className="text-gray-500 text-sm">{post.author.role}</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Cover Image */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="aspect-video relative rounded-2xl overflow-hidden">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
       </section>
 

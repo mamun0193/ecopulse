@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
             {/* Social Links */}
             <div className="flex space-x-4">
               <a
-                href="https://x.com/"
+                href="https://x.com/mrahaman83546"
                 target="_blank"
                 className="w-10 h-10 bg-gray-800 hover:bg-green-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
                 aria-label="Twitter"
