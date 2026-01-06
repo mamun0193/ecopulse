@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,22 +13,18 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo - Left Side */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-linear-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <span className="text-2xl font-bold bg-linear-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+            <Image
+              src="/logo.png"
+              alt="EcoPulse Logo"
+              width={40}
+              height={40}
+              className="rounded-xl transform group-hover:scale-110 transition-transform duration-300"
+              style={{ width: "auto", height: "auto" }}
+            />
+            <span 
+              className="text-2xl font-bold bg-linear-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent"
+              style={{ fontFamily: 'var(--font-orbitron)' }}
+            >
               EcoPulse
             </span>
           </Link>

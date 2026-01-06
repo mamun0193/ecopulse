@@ -113,7 +113,7 @@ Every optimization you make contributes to a greener internet. Start small, meas
     readTime: "8 min read",
     category: "Sustainability",
     tags: ["green web", "sustainability", "performance", "carbon footprint"],
-    coverImage: "/blog/sustainable-web-dev.jpg",
+    coverImage: "/sustainable.jpg",
     featured: true
   },
  
@@ -223,7 +223,7 @@ The Eco Score provides a clear, actionable metric for website sustainability. Fo
     readTime: "7 min read",
     category: "Analysis",
     tags: ["eco score", "metrics", "carbon footprint", "improvement"],
-    coverImage: "/blog/eco-scores.jpg",
+    coverImage: "/ecoscore.png",
     featured: true
   },
   {
@@ -341,7 +341,7 @@ Switching to green hosting is one of the most impactful changes you can make for
     readTime: "6 min read",
     category: "Infrastructure",
     tags: ["hosting", "green hosting", "renewable energy", "data centers"],
-    coverImage: "/blog/green-hosting.jpg",
+    coverImage: "/green-hosting.webp",
     featured: false
   }
 ];
