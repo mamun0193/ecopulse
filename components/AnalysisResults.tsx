@@ -13,8 +13,12 @@ interface AnalysisResultsProps {
 }
 
 export default function AnalysisResults({ data, onReset }: AnalysisResultsProps) {
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print:bg-white print:text-black" id="analysis-report">
       {/* Results Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
@@ -43,7 +47,16 @@ export default function AnalysisResults({ data, onReset }: AnalysisResultsProps)
       <SuggestionCard suggestions={data.suggestions} />
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 print:hidden">
+        <button
+          onClick={handleExportPDF}
+          className="group inline-flex items-center px-6 py-3 bg-gray-800/50 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-800 hover:border-green-500/50 transition-all duration-300"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export as PDF
+        </button>
         <button
           onClick={onReset}
           className="group inline-flex items-center px-6 py-3 bg-gray-800/50 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-800 hover:border-green-500/50 transition-all duration-300"

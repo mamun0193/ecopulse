@@ -99,3 +99,46 @@ html {
 .delay-500 {
   animation-delay: 500ms;
 }
+
+/* Print styles for PDF export */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  .print\\:bg-white {
+    background: white !important;
+  }
+
+  .print\\:text-black {
+    color: black !important;
+  }
+
+  /* Hide navigation and footer during print */
+  nav, footer, .navbar, .footer {
+    display: none !important;
+  }
+
+  /* Ensure cards print nicely */
+  #analysis-report {
+    padding: 20px;
+  }
+
+  #analysis-report > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Make backgrounds visible in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
