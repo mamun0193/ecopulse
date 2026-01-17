@@ -109,18 +109,6 @@ html {
     print-color-adjust: exact;
   }
 
-  .print\\:hidden {
-    display: none !important;
-  }
-
-  .print\\:bg-white {
-    background: white !important;
-  }
-
-  .print\\:text-black {
-    color: black !important;
-  }
-
   /* Hide navigation and footer during print */
   nav, footer, .navbar, .footer {
     display: none !important;
@@ -129,11 +117,19 @@ html {
   /* Ensure cards print nicely */
   #analysis-report {
     padding: 20px;
+    background: white !important;
+    color: black !important;
   }
 
   #analysis-report > div {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  /* Hide buttons during print */
+  #analysis-report button,
+  #analysis-report a {
+    display: none !important;
   }
 
   /* Make backgrounds visible in print */
